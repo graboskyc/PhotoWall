@@ -44,14 +44,23 @@
     <script src="js/bootstrap.min.js"></script>
     <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
     <script src="js/ie10-viewport-bug-workaround.js"></script>
-    <script src="https://s3.amazonaws.com/stitch-sdks/js/bundles/4.0.13/stitch.js"></script>
+    <script src="https://s3.amazonaws.com/stitch-sdks/js/bundles/4.1.1/stitch.js"></script>
     <script>
+      /////////////////////////
+      // set your globals here
+      /////////////////////////
+      var GLOBALIMGROOT = 'https://gskywebstore.blob.core.windows.net/media/';
+      var GLOBALSTITCHAPP = 'carnival-ddssb';
+      var GLOBALDATBASE = 'carnival';
+      var GLOBALCOLLECTION = 'photowall';
+      var GLOBALRELOADTIME = 30000;
+
       var cards = [];
       function writeBuffer() {
         var apStr = '<div class="row">';
           $.each(cards, function(index, c) {
             apStr = apStr + '<div class="card col" onclick="window.location=\'media.html#!'+c.id+'\';"> \
-            <div class="cardinterior" style="background:url(https://gskywebstore.blob.core.windows.net/media/'+c.path+')">\
+            <div class="cardinterior" style="background:url('+GLOBALIMGROOT+c.path+')">\
             <div style="position:absolute;bottom:5px;width:90%;left:5%;">\
             </div></div></div>';
           });
@@ -76,20 +85,16 @@
           });
       }
 
-      const client = stitch.Stitch.initializeDefaultAppClient('ig-epove');
-      const db = client.getServiceClient(stitch.RemoteMongoClient.factory, 'mongodb-atlas').db('ig');
+      const client = stitch.Stitch.initializeDefaultAppClient(GLOBALSTITCHAPP);
+      const db = client.getServiceClient(stitch.RemoteMongoClient.factory, 'mongodb-atlas').db(GLOBALDATBASE);
 
       $(function() {
-        var pipeline = [{$match: {
-                          type:"picture"
-                        }}, {$project: {
-                          path:1
-                        }}, {$sample: {
+        var pipeline = [{$sample: {
                           size: 8
                         }}];
         client.auth.loginWithCredential(new stitch.AnonymousCredential()).then(() => 
-          db.collection('media').aggregate(pipeline).asArray()).then(buildGrid).catch(err => {console.error(err)});
-          setTimeout("location.reload(true);", 30000);
+          db.collection(GLOBALCOLLECTION).aggregate(pipeline).asArray()).then(buildGrid).catch(err => {console.error(err)});
+          setTimeout("location.reload(true);", GLOBALRELOADTIME);
       });
     </script>
   </body>
