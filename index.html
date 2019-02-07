@@ -55,7 +55,7 @@
             <div style="position:absolute;bottom:5px;width:90%;left:5%;">\
             </div></div></div>';
           });
-          while(cards.length < 6) {
+          while(cards.length < 4) {
             apStr = apStr+ '<div class="card col"></div>';
             cards.push({});
           }
@@ -66,25 +66,13 @@
       }
       function bufferRow(card) {
         cards.push(card);
-        if(cards.length == 6) {
+        if(cards.length == 4) {
           writeBuffer();
         }
       }
       function buildGrid(docs) {
           docs.map(media=> {
-                var cap = "";
-                var loc = "";
-                var vis = "";
-                var rekvis = false;
-                var d = media.taken_at;
-                var ds = (d.getUTCMonth()+1) +"/"+ d.getUTCDate() + "/"+  d.getUTCFullYear() + " " + d.getUTCHours() + ":" + d.getUTCMinutes();
-                if(media.hasOwnProperty("caption")) { cap = media.caption; }
-                if(media.hasOwnProperty("location")) { loc = media.location; }
-                if(media.hasOwnProperty('cva')) { if(media.cva.description.captions.length>0) { vis = media.cva.description.captions[0].text;}}
-                if(media.hasOwnProperty("rek")) { rekvis = true; }
-                if(cap.length>35) { cap = cap.substr(0,34) + "...";}
-                var card = {caption:cap, location:loc, path:media.path, id:media._id, taken:ds, cva:vis, rek:rekvis};
-                bufferRow(card);
+                bufferRow({path:media.path, id:media._id});
           });
       }
 
@@ -92,8 +80,15 @@
       const db = client.getServiceClient(stitch.RemoteMongoClient.factory, 'mongodb-atlas').db('ig');
 
       $(function() {
+        var pipeline = [{$match: {
+                          type:"picture"
+                        }}, {$project: {
+                          path:1
+                        }}, {$sample: {
+                          size: 8
+                        }}];
         client.auth.loginWithCredential(new stitch.AnonymousCredential()).then(() => 
-          db.collection('media').aggregate([{'$match':{type:'picture'}}, { '$sample': { size: 18 } } ]).asArray()).then(buildGrid).catch(err => {console.error(err)});
+          db.collection('media').aggregate(pipeline).asArray()).then(buildGrid).catch(err => {console.error(err)});
           setTimeout("location.reload(true);", 30000);
       });
     </script>
