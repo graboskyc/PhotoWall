@@ -14,6 +14,6 @@
 ```
 {
     "_id":"5bb220419b586961c2c60c63",
-    "path":"photos/201708/f1a9cd47e54fcb4c456cfd81ea5182bd.jpg"
+    "path":"https://example.com/path/to/picture.jpg"
 }
 ```

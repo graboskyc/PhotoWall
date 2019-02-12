@@ -49,22 +49,22 @@
       /////////////////////////
       // set your globals here
       /////////////////////////
-      var GLOBALIMGROOT = 'https://gskywebstore.blob.core.windows.net/media/';
       var GLOBALSTITCHAPP = 'carnival-ddssb';
       var GLOBALDATBASE = 'carnival';
       var GLOBALCOLLECTION = 'photowall';
       var GLOBALRELOADTIME = 30000;
+      var GLOBALCOUNT = 2;
 
       var cards = [];
       function writeBuffer() {
-        var apStr = '<div class="row">';
+        var apStr = '<div class="row" style="height:360px !important;">';
           $.each(cards, function(index, c) {
-            apStr = apStr + '<div class="card col" onclick="window.location=\'media.html#!'+c.id+'\';"> \
-            <div class="cardinterior" style="background:url('+GLOBALIMGROOT+c.path+')">\
+            apStr = apStr + '<div class="card col" onclick="window.location=\'media.html#!'+c.id+'\';" height="360px !important;"> \
+            <div class="cardinterior" style="background:url('+c.path+')">\
             <div style="position:absolute;bottom:5px;width:90%;left:5%;">\
             </div></div></div>';
           });
-          while(cards.length < 4) {
+          while(cards.length < GLOBALCOUNT) {
             apStr = apStr+ '<div class="card col"></div>';
             cards.push({});
           }
@@ -75,7 +75,7 @@
       }
       function bufferRow(card) {
         cards.push(card);
-        if(cards.length == 4) {
+        if(cards.length == GLOBALCOUNT) {
           writeBuffer();
         }
       }
@@ -89,8 +89,9 @@
       const db = client.getServiceClient(stitch.RemoteMongoClient.factory, 'mongodb-atlas').db(GLOBALDATBASE);
 
       $(function() {
+        var ct = GLOBALCOUNT * 2;
         var pipeline = [{$sample: {
-                          size: 8
+                          size: ct
                         }}];
         client.auth.loginWithCredential(new stitch.AnonymousCredential()).then(() => 
           db.collection(GLOBALCOLLECTION).aggregate(pipeline).asArray()).then(buildGrid).catch(err => {console.error(err)});
